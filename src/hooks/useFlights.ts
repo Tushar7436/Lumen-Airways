@@ -127,5 +127,6 @@ export function useFlights() {
     error,
     filters,
     setFilters,
+    searchParams: searchParamsObj,
   };
 }

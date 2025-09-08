@@ -7,10 +7,11 @@ import type { Flight } from "@/types/flight"
 
 interface FlightCardProps {
   flight: Flight
-  onSelect: (flightId: string) => void
+  onSelect?: (flightId: string) => void
+  travellers?: string
 }
 
-export function FlightCard({ flight, onSelect }: FlightCardProps) {
+export function FlightCard({ flight, onSelect, travellers }: FlightCardProps) {
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-6">
@@ -71,7 +72,18 @@ export function FlightCard({ flight, onSelect }: FlightCardProps) {
                   <Heart className="h-4 w-4" />
                 </Button>
                 <Button
-                  onClick={() => onSelect(flight.id)}
+                  onClick={() => {
+                    if (onSelect) {
+                      onSelect(flight.id);
+                    } else {
+                      // Create URL with encoded flight data
+                      const params = new URLSearchParams({
+                        flightData: encodeURIComponent(JSON.stringify(flight)),
+                        travellers: travellers || "1"
+                      });
+                      window.location.href = `/flights/summary?${params.toString()}`;
+                    }
+                  }}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   Select

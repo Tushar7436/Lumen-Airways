@@ -20,8 +20,9 @@ export default function DatePickerModal({
   selectedDate,
   tripType,
 }: DatePickerModalProps) {
-  const [currentMonth, setCurrentMonth] = useState(8) // September (0-indexed)
-  const [currentYear, setCurrentYear] = useState(2024)
+  const today = new Date();
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth())
+  const [currentYear, setCurrentYear] = useState(today.getFullYear())
   const [dateType, setDateType] = useState("specific")
 
   const months = [
@@ -44,7 +45,10 @@ export default function DatePickerModal({
   }
 
   const getFirstDayOfMonth = (month: number, year: number) => {
-    return new Date(year, month, 1).getDay()
+    // Correctly get the day of the week, adjusted for the desired display (Monday-first)
+    const day = new Date(year, month, 1).getDay();
+    // Sunday is 0, so we convert it to 6, and shift all others by -1
+    return day === 0 ? 6 : day - 1;
   }
 
   const generateCalendar = (month: number, year: number) => {
@@ -94,6 +98,11 @@ export default function DatePickerModal({
     const days = generateCalendar(month, year)
     const dayLabels = ["M", "T", "W", "T", "F", "S", "S"]
 
+    // Parse the selectedDate string
+    const [selectedDay, selectedMonth, selectedYear] = selectedDate
+      ? selectedDate.split("/").map(Number)
+      : [null, null, null];
+
     return (
       <div className="flex-1">
         <div className="flex items-center justify-center mb-4 relative">
@@ -124,7 +133,7 @@ export default function DatePickerModal({
               key={index}
               onClick={() => day && handleDateClick(day, month, year)}
               className={`
-                p-2 text-center text-sm rounded-full hover:bg-gray-300 transition-colors
+                text-center text-sm rounded-full hover:bg-gray-300 transition-colors
                 ${!day ? "invisible" : ""}
                 ${day === 10 && month === 8 ? "bg-blue-900 text-white" : ""}
                 ${day ? "hover:bg-gray-100" : ""}
@@ -145,11 +154,11 @@ export default function DatePickerModal({
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Select date</DialogTitle>
           <div className="flex items-center justify-between mb-4">
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <Button
                 variant={dateType === "specific" ? "default" : "outline"}
                 onClick={() => setDateType("specific")}
-                className="bg-slate-800 text-white hover:bg-slate-700"
+                className="bg-slate-800 text-white"
               >
                 Specific dates
               </Button>
@@ -163,8 +172,7 @@ export default function DatePickerModal({
         </div>
 
         <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Search one way</span>
-          <Button onClick={onClose} className="bg-blue-600 hover:bg-blue-700 text-white px-8">
+          <Button onClick={onClose} className="bg-blue-900 text-white px-8">
             Apply
           </Button>
         </div>

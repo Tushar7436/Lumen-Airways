@@ -9,9 +9,10 @@ import type { Flight } from "@/types/flight"
 interface ResultsListProps {
   flights: Flight[]
   isLoading?: boolean
+  travellers?: string
 }
 
-export function ResultsList({ flights, isLoading }: ResultsListProps) {
+export function ResultsList({ flights, isLoading, travellers }: ResultsListProps) {
   const [sortBy, setSortBy] = useState("cheapest")
 
   const sortedFlights = [...flights].sort((a, b) => {
@@ -78,13 +79,8 @@ export function ResultsList({ flights, isLoading }: ResultsListProps) {
       {/* Flight Results */}
       <div className="space-y-4">
         {sortedFlights.map((flight) => (
-          <FlightCard key={flight.id} flight={flight} onSelect={handleFlightSelect} />
+          <FlightCard key={flight.id} flight={flight} travellers={travellers} />
         ))}
-      </div>
-
-      {/* Load More */}
-      <div className="text-center">
-        <Button variant="outline">Load more results</Button>
       </div>
     </div>
   )

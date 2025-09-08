@@ -6,7 +6,7 @@ import { ResultsList } from "@/(components)/results-list";
 import { useFlights } from "@/hooks/useFlights";
 
 export default function FlightsPage() {
-  const { flights, loading, error, filters, setFilters } = useFlights();
+  const { flights, loading, error, filters, setFilters, searchParams } = useFlights();
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -23,7 +23,7 @@ export default function FlightsPage() {
           {error ? (
             <div className="text-red-500">{error}</div>
           ) : (
-            <ResultsList flights={flights} isLoading={loading} />
+            <ResultsList flights={flights} isLoading={loading} travellers={searchParams.travellers} />
           )}
         </main>
       </div>
