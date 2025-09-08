@@ -17,12 +17,17 @@ export function FlightCard({ flight, onSelect }: FlightCardProps) {
         <div className="flex items-center justify-between">
           {/* Flight Details */}
           <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-            {/* Airline */}
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-red-600 rounded flex items-center justify-center text-white text-xs font-bold">
-                {flight.airline.code}
+            {/* Airline and Flight Info */}
+            <div className="flex flex-col space-y-2">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-red-600 rounded flex items-center justify-center text-white text-xs font-bold">
+                  {flight.airline.code}
+                </div>
+                <span className="text-sm text-muted-foreground">{flight.airline.name}</span>
               </div>
-              <span className="text-sm text-muted-foreground">{flight.airline.name}</span>
+              <div className="text-xs text-muted-foreground">
+                <span className="font-medium">Flight:</span> {flight.flightNumber || `${flight.carrier} ${flight.id}`}
+              </div>
             </div>
 
             {/* Times */}
@@ -30,6 +35,7 @@ export function FlightCard({ flight, onSelect }: FlightCardProps) {
               <div className="text-center">
                 <div className="text-lg font-semibold">{flight.departure.time}</div>
                 <div className="text-sm text-muted-foreground">{flight.departure.airport.code}</div>
+                <div className="text-xs text-muted-foreground">{flight.departure.airport.name}</div>
               </div>
               <div className="flex flex-col items-center">
                 <div className="text-xs text-muted-foreground">{flight.duration}</div>
@@ -41,12 +47,15 @@ export function FlightCard({ flight, onSelect }: FlightCardProps) {
               <div className="text-center">
                 <div className="text-lg font-semibold">{flight.arrival.time}</div>
                 <div className="text-sm text-muted-foreground">{flight.arrival.airport.code}</div>
+                <div className="text-xs text-muted-foreground">{flight.arrival.airport.name}</div>
               </div>
             </div>
 
             {/* Stop Details */}
             <div className="text-sm text-muted-foreground">
-              {flight.stops > 0 && flight.stopDetails && <div>{flight.stopDetails.join(", ")}</div>}
+              {flight.stops > 0 && flight.stopDetails && flight.stopDetails.length > 0 && (
+                <div>{flight.stopDetails.join(", ")}</div>
+              )}
             </div>
 
             {/* Price and Actions */}

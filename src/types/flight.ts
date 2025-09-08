@@ -23,28 +23,43 @@ export interface PriceInfo {
 
 export interface Flight {
   id: string;
-  airline: AirlineInfo;
-
-  departure: LegEndpoint;
-  arrival: LegEndpoint;
-
-  duration: string; // e.g. "120" minutes or formatted string
-  stops: number; // 0 = direct
-  stopDetails?: string[]; // e.g. ["DEL", "BOM"]
-
-  price: PriceInfo;
-  deals?: string[]; // labels like ["Best", "Saver"]
-
-  // Optional fields that may be present from backend responses
-  from?: string;
-  to?: string;
-  departureAirportId?: string;
-  arrivalAirportId?: string;
-  departTime?: string;
-  departureTime?: string;
-  arrivalTime?: string;
-  fare?: number;
-  carrier?: string;
+  flightNumber?: string; // Added this field
+  airline: {
+    code: string;
+    name: string;
+  };
+  departure: {
+    time: string;
+    airport: {
+      code: string;
+      name: string;
+      city: string;
+    };
+  };
+  arrival: {
+    time: string;
+    airport: {
+      code: string;
+      name: string;
+      city: string;
+    };
+  };
+  duration: string;
+  stops: number;
+  stopDetails: any[];
+  price: {
+    amount: number;
+    currency: string;
+  };
+  deals: any[];
+  from: string;
+  to: string;
+  departureAirportId: string;
+  arrivalAirportId: string;
+  departureTime: string;
+  arrivalTime: string;
+  fare: number;
+  carrier: string;
 }
 
 export interface FilterOptions {
@@ -55,5 +70,3 @@ export interface FilterOptions {
 }
 
 export type { Flight as default };
-
-
