@@ -14,7 +14,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="w-full bg-[#05203c] shadow-md px-6 py-5 flex justify-between items-center">
+    <nav className="w-full bg-[#05203c] shadow-md px-6 py-9 flex justify-between items-center">
       {/* Left side: Logo */}
       <div className="font-bold pl-10 text-xl text-white font-sans">
         {/* It's good practice to make the logo a link to the homepage */}

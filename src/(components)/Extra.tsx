@@ -3,7 +3,7 @@ export default function Extra(){
       <div className="py-16 flex justify-center">
       <div className="max-w-6xl bg-[rgba(239,243,248,1)] font-extralight tracking-normal text-black justify-center mx-1.5 my-1.5 rounded-lg">
         <div className="text-center mb-12">
-          <h2 className="font-bold text-gray-900 mb-6 text-3xl pt-2.5 mt-0">
+          <h2 className="font-bold text-gray-900 mb-6 text-3xl pt-2.5 mt-2">
             Looking for the best flight deals to anywhere in the world?
           </h2>
           <p className="text-gray-700 leading-relaxed max-w-4xl mx-auto text-base">
