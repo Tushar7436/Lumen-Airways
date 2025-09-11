@@ -9,10 +9,9 @@ import type { Flight } from "@/types/flight"
 interface ResultsListProps {
   flights: Flight[]
   isLoading?: boolean
-  travellers?: string
 }
 
-export function ResultsList({ flights, isLoading, travellers }: ResultsListProps) {
+export function ResultsList({ flights, isLoading }: ResultsListProps) {
   const [sortBy, setSortBy] = useState("cheapest")
 
   const sortedFlights = [...flights].sort((a, b) => {
@@ -32,7 +31,25 @@ export function ResultsList({ flights, isLoading, travellers }: ResultsListProps
   })
 
   const handleFlightSelect = (flightId: string) => {
-    console.log("Selected flight:", flightId)
+    const selectedFlight = flights.find(f => f.id === flightId);
+    if (selectedFlight) {
+      // Get travellers from URL params
+      const params = new URLSearchParams(window.location.search);
+      const travellers = params.get('travellers') || '1';
+      
+      // Create URL with minimal flight details
+      const summaryParams = new URLSearchParams({
+        flightId: selectedFlight.id,
+        flightNumber: selectedFlight.flightNumber || "",
+        departureTime: selectedFlight.departure.time,
+        arrivalTime: selectedFlight.arrival.time,
+        departureCode: selectedFlight.departure.airport.code,
+        arrivalCode: selectedFlight.arrival.airport.code,
+        price: selectedFlight.price.amount.toString(),
+        travellers
+      });
+      window.location.href = `/flights/summary?${summaryParams.toString()}`;
+    }
   }
 
   if (isLoading) {
@@ -79,7 +96,7 @@ export function ResultsList({ flights, isLoading, travellers }: ResultsListProps
       {/* Flight Results */}
       <div className="space-y-4">
         {sortedFlights.map((flight) => (
-          <FlightCard key={flight.id} flight={flight} travellers={travellers} />
+          <FlightCard key={flight.id} flight={flight} onSelect={handleFlightSelect} />
         ))}
       </div>
     </div>

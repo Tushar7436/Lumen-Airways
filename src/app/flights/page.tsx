@@ -23,7 +23,7 @@ export default function FlightsPage() {
           {error ? (
             <div className="text-red-500">{error}</div>
           ) : (
-            <ResultsList flights={flights} isLoading={loading} travellers={searchParams.travellers} />
+            <ResultsList flights={flights} isLoading={loading} />
           )}
         </main>
       </div>

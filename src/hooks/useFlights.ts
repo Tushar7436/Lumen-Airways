@@ -61,7 +61,7 @@ export function useFlights() {
       setError(null);
       
       try {
-        const url = `/flights`;
+        const url = `/flightService/api/v1/flights`;
         const body = new URLSearchParams(searchParamsObj as Record<string, string>);
         const { data } = await api.get(url + `?${body.toString()}`);
         

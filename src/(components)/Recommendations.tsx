@@ -1,6 +1,6 @@
 // app/recommendations/page.tsx (using App Router with SSG/ISR)
 
-import axios from "axios";
+import api from "@/lib/axios";
 
 type Flight = {
   date: string;
@@ -18,7 +18,7 @@ type Deal = {
 
 async function getDeals(): Promise<Deal[]> {
   try {
-    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/flights`);
+    const res = await api.get("/flightService/api/v1/flights");
     const json = res.data;
 
     if (json.success && Array.isArray(json.data)) {

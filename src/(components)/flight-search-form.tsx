@@ -34,7 +34,7 @@ export default function FlightSearchForm() {
   useEffect(() => {
     const fetchFlights = async () => {
       try {
-        const res = await api.get("/flights");
+        const res = await api.get("/flightService/api/v1/flights");
         const json = res.data;
 
         if (json.success && Array.isArray(json.data)) {
@@ -270,7 +270,7 @@ export default function FlightSearchForm() {
   
           {/* Options and Search */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mt-4 gap-4">
-            <Button onClick={goToResults} className="bg-white hover:bg-blue-700 text-gray-900 px-8 py-6 text-lg font-medium rounded-lg shadow">
+            <Button onClick={goToResults} className="bg-white hover:bg-blue-100 text-gray-900 px-8 py-6 text-lg font-medium rounded-lg shadow">
               Search
             </Button>
           </div>

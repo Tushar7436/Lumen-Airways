@@ -1,73 +1,73 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/(components)/ui/card";
 import { Button } from "@/(components)/ui/button";
-import { bookingService } from "@/lib/api/booking";
-import type { Flight } from "@/types/flight";
+import api from "@/lib/axios";
 
-// Generate a random user ID (this should be replaced with proper auth)
-const generateUserId = () => `user_${Math.random().toString(36).substr(2, 9)}`;
-
-export default function BookingSummaryPage() {
+export default function FlightSummaryPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [flight, setFlight] = useState<Flight | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Get the flight details from URL params
-  const flightData = searchParams?.get("flightData");
-  const travellers = searchParams?.get("travellers") || "1";
+  // Get flight details from URL params
+  const flightId = Number(searchParams?.get("flightId"));
+  const flightNumber = searchParams?.get("flightNumber") || "";
+  const departureTime = searchParams?.get("departureTime") || "";
+  const arrivalTime = searchParams?.get("arrivalTime") || "";
+  const departureCode = searchParams?.get("departureCode") || "";
+  const arrivalCode = searchParams?.get("arrivalCode") || "";
+  const price = Number(searchParams?.get("price") || "0");
+  const noOfSeats = Number(searchParams?.get("travellers") || "1");
 
-  useEffect(() => {
-    if (flightData) {
-      try {
-        const parsedFlight = JSON.parse(decodeURIComponent(flightData)) as Flight;
-        setFlight(parsedFlight);
-      } catch (err) {
-        setError("Invalid flight data");
-      }
-    }
-  }, [flightData]);
-
-  const handleBooking = async () => {
-    if (!flight) return;
-
+  // Handle flight booking
+  const handleBookFlight = async () => {
+    if (loading) return;
+    
     setLoading(true);
     setError(null);
-
+    
     try {
-      // In a real app, this would come from your auth system
-      const userId = generateUserId();
+      const bookingData = {
+        userId: 1, // Hardcoded userId as requested
+        flightId,
+        noOfSeats,
+      };
 
-      const response = await bookingService.createBooking({
-        userId,
-        flightId: flight.id,
-        noOfSeats: parseInt(travellers, 10),
-      });
-
-      if (response.success) {
-        // Redirect to booking confirmation page
-        router.push(`/bookings/${response.data.id}`);
+      console.log('Sending booking data:', bookingData);
+      
+      const response = await api.post('/bookingService/api/v1/bookings', bookingData);
+      
+      console.log('Booking response:', response.data);
+      
+      // Check if booking was successful
+      if (response.data?.success && response.data?.data) {
+        const bookingDetails = response.data.data;
+        const paymentUrl = `/flights/payment?bookingId=${bookingDetails.id}&amount=${bookingDetails.totalCost}&status=${bookingDetails.status}`;
+        console.log('Redirecting to payment:', paymentUrl);
+        router.push(paymentUrl);
       } else {
-        setError(response.message || "Failed to create booking");
+        throw new Error(response.data?.message || 'Booking failed');
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create booking");
+      
+    } catch (error: any) {
+      console.error('Booking error:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to book flight. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  if (!flight) {
+  if (!flightId || !departureTime || !arrivalTime) {
     return (
       <div className="container mx-auto p-8">
         <Card>
           <CardContent className="p-6">
             <div className="text-center text-red-500">
-              {error || "No flight details available"}
+              No flight details available
             </div>
           </CardContent>
         </Card>
@@ -79,7 +79,7 @@ export default function BookingSummaryPage() {
     <div className="container mx-auto p-8">
       <Card>
         <CardHeader>
-          <CardTitle>Booking Summary</CardTitle>
+          <CardTitle>Flight Summary</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Flight Details */}
@@ -88,17 +88,30 @@ export default function BookingSummaryPage() {
               <div>
                 <h3 className="font-semibold">Flight Details</h3>
                 <p className="text-sm text-muted-foreground">
-                  {flight.flightNumber} - {flight.airline.name}
+                  {flightNumber}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {flight.departure.airport.code} → {flight.arrival.airport.code}
+                  {departureCode} → {arrivalCode}
                 </p>
               </div>
               <div className="text-right">
                 <p className="text-sm font-medium">
-                  {flight.departure.time} - {flight.arrival.time}
+                  {departureTime} - {arrivalTime}
                 </p>
-                <p className="text-sm text-muted-foreground">{flight.duration}</p>
+              </div>
+            </div>
+
+            {/* Airport Details */}
+            <div className="grid grid-cols-2 gap-4 border-b pb-4">
+              <div>
+                <h4 className="font-semibold mb-2">Departure</h4>
+                <p className="text-sm text-muted-foreground">{departureCode}</p>
+                <p className="text-sm text-muted-foreground">{departureTime}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Arrival</h4>
+                <p className="text-sm text-muted-foreground">{arrivalCode}</p>
+                <p className="text-sm text-muted-foreground">{arrivalTime}</p>
               </div>
             </div>
 
@@ -106,7 +119,7 @@ export default function BookingSummaryPage() {
             <div className="border-b pb-4">
               <h3 className="font-semibold mb-2">Passenger Details</h3>
               <p className="text-sm text-muted-foreground">
-                Number of Passengers: {travellers}
+                Number of Passengers: {noOfSeats}
               </p>
             </div>
 
@@ -115,8 +128,8 @@ export default function BookingSummaryPage() {
               <h3 className="font-semibold mb-2">Price Summary</h3>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Base Fare ({travellers} {parseInt(travellers, 10) > 1 ? 'passengers' : 'passenger'})</span>
-                  <span>₹{(flight.price.amount * parseInt(travellers, 10)).toLocaleString()}</span>
+                  <span>Base Fare ({noOfSeats} {noOfSeats > 1 ? 'passengers' : 'passenger'})</span>
+                  <span>₹{(price * noOfSeats).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>Taxes & Fees</span>
@@ -124,31 +137,32 @@ export default function BookingSummaryPage() {
                 </div>
                 <div className="flex justify-between font-semibold pt-2 border-t">
                   <span>Total Amount</span>
-                  <span>₹{(flight.price.amount * parseInt(travellers, 10)).toLocaleString()}</span>
+                  <span>₹{(price * noOfSeats).toLocaleString()}</span>
                 </div>
               </div>
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={() => router.back()}>
-            Back
-          </Button>
-          <Button 
-            onClick={handleBooking} 
-            disabled={loading}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
-          >
-            {loading ? "Processing..." : "Confirm Booking"}
-          </Button>
+        <CardFooter className="flex flex-col space-y-4">
+          <div className="flex justify-between w-full">
+            <Button variant="outline" onClick={() => router.back()} disabled={loading}>
+              Back
+            </Button>
+            <Button 
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={handleBookFlight}
+              disabled={loading}
+            >
+              {loading ? "Processing..." : "Continue to Payment"}
+            </Button>
+          </div>
+          {error && (
+            <div className="text-sm text-red-500 text-center w-full">
+              {error}
+            </div>
+          )}
         </CardFooter>
       </Card>
-
-      {error && (
-        <div className="mt-4 p-4 bg-red-50 text-red-600 rounded">
-          {error}
-        </div>
-      )}
     </div>
   );
 }
