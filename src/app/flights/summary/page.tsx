@@ -25,24 +25,22 @@ export default function FlightSummaryPage() {
   // Handle flight booking
   const handleBookFlight = async () => {
     if (loading) return;
-    
+    const jwt = localStorage.getItem('jwt_token');
+    if (!jwt) {
+      router.push('/auth/login');
+      return;
+    }
     setLoading(true);
     setError(null);
-    
     try {
       const bookingData = {
         userId: 1, // Hardcoded userId as requested
         flightId,
         noOfSeats,
       };
-
       console.log('Sending booking data:', bookingData);
-      
       const response = await api.post('/bookingService/api/v1/bookings', bookingData);
-      
       console.log('Booking response:', response.data);
-      
-      // Check if booking was successful
       if (response.data?.success && response.data?.data) {
         const bookingDetails = response.data.data;
         const paymentUrl = `/flights/payment?bookingId=${bookingDetails.id}&amount=${bookingDetails.totalCost}&status=${bookingDetails.status}`;
@@ -51,7 +49,6 @@ export default function FlightSummaryPage() {
       } else {
         throw new Error(response.data?.message || 'Booking failed');
       }
-      
     } catch (error: any) {
       console.error('Booking error:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to book flight. Please try again.';

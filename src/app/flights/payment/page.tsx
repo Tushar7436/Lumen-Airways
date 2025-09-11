@@ -74,7 +74,12 @@ export default function PaymentPage() {
         userId: Number(userId),
         bookingId: Number(paymentDetails.bookingId),
       };
-      const res = await api.post("/bookingService/api/v1/bookings/payments", paymentData);
+      const jwt = localStorage.getItem('jwt_token');
+      const res = await api.post("/bookingService/api/v1/bookings/payments", paymentData, {
+        headers: {
+          'x-idempotency-key': jwt || ''
+        }
+      });
       setPaymentResponse(res.data);
       setPaymentConfirmed(true);
     } catch (err: any) {
