@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef,Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/(components)/ui/card";
 import { Button } from "@/(components)/ui/button";
 import api from "@/lib/axios";
 
-export default function PaymentPage() {
+function PaymentPageComponent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -172,5 +172,13 @@ export default function PaymentPage() {
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+export default function PaymentPage(){
+  return (
+    <Suspense fallback={<div>Loading flight summary...</div>}>
+      <PaymentPageComponent/>
+    </Suspense>
   );
 }

@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/(components)/ui/card";
 import { Button } from "@/(components)/ui/button";
 import api from "@/lib/axios";
 
-export default function FlightSummaryPage() {
+function FlightSummaryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -25,37 +25,40 @@ export default function FlightSummaryPage() {
   // Handle flight booking
   const handleBookFlight = async () => {
     if (loading) return;
-    const jwt = localStorage.getItem('jwt_token');
+    const jwt = localStorage.getItem("jwt_token");
     if (!jwt) {
-      router.push('/auth/login');
+      router.push("/auth/login");
       return;
     }
     setLoading(true);
     setError(null);
     try {
-      const userId = localStorage.getItem('userId');
+      const userId = localStorage.getItem("userId");
       if (!userId) {
-        throw new Error('User ID not found');
+        throw new Error("User ID not found");
       }
       const bookingData = {
         userId: Number(userId),
         flightId,
         noOfSeats,
       };
-      console.log('Sending booking data:', bookingData);
-      const response = await api.post('/bookingService/api/v1/bookings', bookingData);
-      console.log('Booking response:', response.data);
+      console.log("Sending booking data:", bookingData);
+      const response = await api.post("/bookingService/api/v1/bookings", bookingData);
+      console.log("Booking response:", response.data);
       if (response.data?.success && response.data?.data) {
         const bookingDetails = response.data.data;
         const paymentUrl = `/flights/payment?bookingId=${bookingDetails.id}&amount=${bookingDetails.totalCost}&status=${bookingDetails.status}`;
-        console.log('Redirecting to payment:', paymentUrl);
+        console.log("Redirecting to payment:", paymentUrl);
         router.push(paymentUrl);
       } else {
-        throw new Error(response.data?.message || 'Booking failed');
+        throw new Error(response.data?.message || "Booking failed");
       }
     } catch (error: any) {
-      console.error('Booking error:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to book flight. Please try again.';
+      console.error("Booking error:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to book flight. Please try again.";
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -67,9 +70,7 @@ export default function FlightSummaryPage() {
       <div className="container mx-auto p-8">
         <Card>
           <CardContent className="p-6">
-            <div className="text-center text-red-500">
-              No flight details available
-            </div>
+            <div className="text-center text-red-500">No flight details available</div>
           </CardContent>
         </Card>
       </div>
@@ -88,9 +89,7 @@ export default function FlightSummaryPage() {
             <div className="flex justify-between items-start border-b pb-4">
               <div>
                 <h3 className="font-semibold">Flight Details</h3>
-                <p className="text-sm text-muted-foreground">
-                  {flightNumber}
-                </p>
+                <p className="text-sm text-muted-foreground">{flightNumber}</p>
                 <p className="text-sm text-muted-foreground">
                   {departureCode} → {arrivalCode}
                 </p>
@@ -129,7 +128,9 @@ export default function FlightSummaryPage() {
               <h3 className="font-semibold mb-2">Price Summary</h3>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Base Fare ({noOfSeats} {noOfSeats > 1 ? 'passengers' : 'passenger'})</span>
+                  <span>
+                    Base Fare ({noOfSeats} {noOfSeats > 1 ? "passengers" : "passenger"})
+                  </span>
                   <span>₹{(price * noOfSeats).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm text-muted-foreground">
@@ -149,7 +150,7 @@ export default function FlightSummaryPage() {
             <Button variant="outline" onClick={() => router.back()} disabled={loading}>
               Back
             </Button>
-            <Button 
+            <Button
               className="bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={handleBookFlight}
               disabled={loading}
@@ -158,12 +159,18 @@ export default function FlightSummaryPage() {
             </Button>
           </div>
           {error && (
-            <div className="text-sm text-red-500 text-center w-full">
-              {error}
-            </div>
+            <div className="text-sm text-red-500 text-center w-full">{error}</div>
           )}
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+export default function FlightSummaryPage() {
+  return (
+    <Suspense fallback={<div>Loading flight summary...</div>}>
+      <FlightSummaryContent />
+    </Suspense>
   );
 }
