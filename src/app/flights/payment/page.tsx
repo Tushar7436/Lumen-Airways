@@ -17,7 +17,7 @@ export default function PaymentPage() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
-  const userId = 1; // Hardcoded userId as in summary page
+  const userId = localStorage.getItem('userId');
 
   useEffect(() => {
     const bookingId = searchParams.get("bookingId");
@@ -69,6 +69,9 @@ export default function PaymentPage() {
     setPaymentResponse(null);
     
     try {
+      if (!userId) {
+        throw new Error('User ID not found');
+      }
       const paymentData = {
         totalCost: paymentDetails.amount,
         userId: Number(userId),

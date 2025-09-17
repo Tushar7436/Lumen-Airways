@@ -13,10 +13,11 @@ export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,38 +25,17 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const response = await api.post("/api/v1/user/signin", formData);
-      
-      // Check if the response was successful and has the expected structure
-      if (response.data?.success && response.data?.data) {
-        const token = response.data.data; // JWT token is in the data field
-        
-        // Decode the JWT to extract user ID (optional, for logging purposes)
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          const userId = payload.id;
-          
-          // Store the token in localStorage
-          localStorage.setItem("jwt_token", token);
-          localStorage.setItem("user_id", userId.toString());
-          
-          console.log("Login successful, token:", token);
-          console.log("User ID:", userId);
-          
-          // Redirect back or to home page
-          const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
-          router.push(returnUrl || "/");
-        } catch (decodeError) {
-          console.error("Error decoding token:", decodeError);
-          // Still proceed with login if token decoding fails
-          localStorage.setItem("jwt_token", token);
-          router.push("/");
-        }
-      } else {
-        throw new Error(response.data?.message || "Login failed");
-      }
+      const { data } = await api.post("/api/v1/user/signin", formData);
+
+      if (!data?.success || !data?.data) throw new Error(data?.message || "Login failed");
+
+      const jwt = data.data;
+      localStorage.setItem("jwt_token", jwt);
+      localStorage.setItem("recipientEmail", formData.email); // ✅ store email
+
+      const returnUrl = new URLSearchParams(window.location.search).get("returnUrl");
+      router.push(returnUrl || "/");
     } catch (err: any) {
-      console.error("Login error:", err);
       setError(err.response?.data?.message || err.message || "Login failed");
     } finally {
       setLoading(false);
@@ -77,9 +57,7 @@ export default function LoginPage() {
                 type="email"
                 placeholder="Enter your email"
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={handleChange}
                 required
               />
             </div>
@@ -90,22 +68,14 @@ export default function LoginPage() {
                 type="password"
                 placeholder="Enter your password"
                 value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+                onChange={handleChange}
                 required
               />
             </div>
-            {error && (
-              <div className="text-sm text-red-500 text-center">{error}</div>
-            )}
+            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-            >
+            <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Logging in..." : "Login"}
             </Button>
             <p className="text-sm text-center">

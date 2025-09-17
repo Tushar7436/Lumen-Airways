@@ -33,8 +33,12 @@ export default function FlightSummaryPage() {
     setLoading(true);
     setError(null);
     try {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        throw new Error('User ID not found');
+      }
       const bookingData = {
-        userId: 1, // Hardcoded userId as requested
+        userId: Number(userId),
         flightId,
         noOfSeats,
       };
