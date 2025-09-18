@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/(components)/ui/card";
@@ -14,10 +15,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const { login } = useAuth();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,11 +27,8 @@ export default function LoginPage() {
       const { data } = await api.post("/api/v1/user/signin", formData);
 
       if (!data?.success || !data?.data) throw new Error(data?.message || "Login failed");
-
-      const jwt = data.data;
-      localStorage.setItem("jwt_token", jwt);
-      localStorage.setItem("recipientEmail", formData.email); // ✅ store email
-
+      const { jwt, UserId, recepientEmail, userName } = data.data;
+      login(jwt, UserId.toString(), userName, recepientEmail);
       const returnUrl = new URLSearchParams(window.location.search).get("returnUrl");
       router.push(returnUrl || "/");
     } catch (err: any) {
@@ -57,7 +53,7 @@ export default function LoginPage() {
                 type="email"
                 placeholder="Enter your email"
                 value={formData.email}
-                onChange={handleChange}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })} 
                 required
               />
             </div>
@@ -68,7 +64,7 @@ export default function LoginPage() {
                 type="password"
                 placeholder="Enter your password"
                 value={formData.password}
-                onChange={handleChange}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })} 
                 required
               />
             </div>

@@ -17,7 +17,7 @@ function PaymentPageComponent() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
-  const userId = localStorage.getItem('userId');
+  const userId = localStorage.getItem('user_id');
 
   useEffect(() => {
     const bookingId = searchParams.get("bookingId");
@@ -72,11 +72,15 @@ function PaymentPageComponent() {
       if (!userId) {
         throw new Error('User ID not found');
       }
+      const recipientEmail = localStorage.getItem("recipientEmail");
       const paymentData = {
         totalCost: paymentDetails.amount,
         userId: Number(userId),
         bookingId: Number(paymentDetails.bookingId),
+        recipientEmail
       };
+      console.log("paymentData",paymentData);
+      
       const jwt = localStorage.getItem('jwt_token');
       const res = await api.post("/bookingService/api/v1/bookings/payments", paymentData, {
         headers: {

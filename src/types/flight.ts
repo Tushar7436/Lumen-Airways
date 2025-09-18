@@ -10,6 +10,19 @@ export interface AirportInfo {
   name?: string;
   city?: string;
 }
+export interface Deal {
+  city: string;
+  country: string;
+  img: string;
+  flights: Flight[];
+  price: string;
+}
+ 
+export interface FlightApiResponse{
+  success: boolean;
+  data: any[]; 
+}
+
 
 export interface LegEndpoint {
   time: string; // e.g. "10:30"

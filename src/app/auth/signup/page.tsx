@@ -8,9 +8,11 @@ import { Button } from "@/(components)/ui/button";
 import { Input } from "@/(components)/ui/input";
 import { Label } from "@/(components)/ui/label";
 import api from "@/lib/axios";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SignUpPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -19,6 +21,11 @@ export default function SignUpPage() {
     password: "",
   });
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -26,10 +33,16 @@ export default function SignUpPage() {
 
     try {
       const response = await api.post("/api/v1/user/signup", formData);
-      
-      if (response.data) {
-        // Redirect back or to home page
-        const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+
+      if (response.data?.success && response.data?.data) {
+        // Extract data for auto-login
+        const { jwt, UserId, userName, recepientEmail } = response.data.data;
+
+        // Call login function from AuthContext
+        login(jwt, UserId.toString(), userName, recepientEmail);
+
+        // Redirect to returnUrl or homepage
+        const returnUrl = new URLSearchParams(window.location.search).get("returnUrl");
         router.push(returnUrl || "/");
       } else {
         throw new Error(response.data?.message || "Signup failed");
@@ -50,14 +63,12 @@ export default function SignUpPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="userName">Username</Label>
+              <Label htmlFor="UserName">Username</Label>
               <Input
-                id="userName"
+                id="UserName"
                 placeholder="Enter your username"
                 value={formData.UserName}
-                onChange={(e) =>
-                  setFormData({ ...formData, UserName: e.target.value })
-                }
+                onChange={handleChange}
                 required
               />
             </div>
@@ -68,9 +79,7 @@ export default function SignUpPage() {
                 type="email"
                 placeholder="Enter your email"
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={handleChange}
                 required
               />
             </div>
@@ -81,22 +90,14 @@ export default function SignUpPage() {
                 type="password"
                 placeholder="Enter your password"
                 value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+                onChange={handleChange}
                 required
               />
             </div>
-            {error && (
-              <div className="text-sm text-red-500 text-center">{error}</div>
-            )}
+            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-            >
+            <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Creating account..." : "Sign Up"}
             </Button>
             <p className="text-sm text-center">

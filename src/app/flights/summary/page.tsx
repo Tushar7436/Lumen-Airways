@@ -13,14 +13,14 @@ function FlightSummaryContent() {
   const [error, setError] = useState<string | null>(null);
 
   // Get flight details from URL params
-  const flightId = Number(searchParams?.get("flightId"));
+  const flightId = searchParams?.get("flightId");
   const flightNumber = searchParams?.get("flightNumber") || "";
   const departureTime = searchParams?.get("departureTime") || "";
   const arrivalTime = searchParams?.get("arrivalTime") || "";
   const departureCode = searchParams?.get("departureCode") || "";
   const arrivalCode = searchParams?.get("arrivalCode") || "";
-  const price = Number(searchParams?.get("price") || "0");
-  const noOfSeats = Number(searchParams?.get("travellers") || "1");
+  const price = searchParams?.get("price") || "0";
+  const noOfSeats = searchParams?.get("travellers") || "1";
 
   // Handle flight booking
   const handleBookFlight = async () => {
@@ -33,14 +33,16 @@ function FlightSummaryContent() {
     setLoading(true);
     setError(null);
     try {
-      const userId = localStorage.getItem("userId");
+      const userId = localStorage.getItem("user_id");
+      const recipientEmail = localStorage.getItem("recipientEmail");
       if (!userId) {
         throw new Error("User ID not found");
       }
       const bookingData = {
-        userId: Number(userId),
+        userId: userId,
         flightId,
         noOfSeats,
+        recipientEmail
       };
       console.log("Sending booking data:", bookingData);
       const response = await api.post("/bookingService/api/v1/bookings", bookingData);
@@ -129,7 +131,7 @@ function FlightSummaryContent() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>
-                    Base Fare ({noOfSeats} {noOfSeats > 1 ? "passengers" : "passenger"})
+                    Base Fare ({noOfSeats} {noOfSeats > '1' ? "passengers" : "passenger"})
                   </span>
                   <span>₹{(price * noOfSeats).toLocaleString()}</span>
                 </div>

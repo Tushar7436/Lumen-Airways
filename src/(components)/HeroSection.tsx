@@ -6,7 +6,7 @@ import Image from "next/image";
 
 export default function HeroSection() {
   return (
-    <section className="relative py-20 text-left text-white">
+    <section className="relative py-25 text-left text-white">
       <div className="absolute inset-0 -z-10">
         <Image src="/hero.jpg" alt="Hero Image" fill style={{ objectFit: 'cover' }}
         />

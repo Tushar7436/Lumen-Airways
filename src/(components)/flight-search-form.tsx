@@ -7,6 +7,7 @@ import { Label } from "@/(components)/ui/label";
 import { ArrowLeftRight } from "lucide-react";
 import DatePickerModal from "@/(components)/ui/date-picker-modal";
 import PassengerModal from "@/(components)/ui/passenger-modal";
+import AirportDropdown from "@/(components)/ui/airport-dropdown";
 import api from "@/lib/axios";
 
 export default function FlightSearchForm() {
@@ -134,55 +135,25 @@ export default function FlightSearchForm() {
 
   return (
     <>
-      <div className="rounded-lg bg-[#05203c] text-white p-10">
-        <div className="max-w-7xl mx-auto">
+      <div className="rounded-lg bg-[#05203c] text-white p-15">
+        <div className="max-w-10xl mx-auto">
           {/* Main Search Form */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 bg-white rounded-lg overflow-visible">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-6 bg-white rounded-lg overflow-visible">
             
             {/* From Field */}
-            <div ref={fromRef} className="relative p-4 border-r border-gray-300">
-              <Label className="text-sm text-gray-600 mb-1">From</Label>
-              <input
-                value={fromQuery}
-                onChange={(e) => {
-                  setFromQuery(e.target.value);
-                  setFromLocation(e.target.value);
-                  setFromOpen(true);
-                }}
-                onFocus={() => setFromOpen(true)}
-                className="w-full border-0 p-0 text-gray-900 font-medium focus-visible:ring-0 bg-transparent outline-none"
-                placeholder="departure"
-              />
-              {fromOpen && (
-                <ul className="absolute left-0 right-0 mt-2 max-h-64 overflow-auto bg-white text-gray-900 rounded-lg shadow-xl z-20 border border-gray-200">
-                  {fromOptions
-                    .filter((opt) =>
-                      opt.toLowerCase().includes(fromQuery.toLowerCase())
-                    )
-                    .map((opt) => (
-                      <li
-                        key={opt}
-                        className={`px-4 py-2 cursor-pointer hover:bg-blue-50 ${
-                          fromLocation === opt ? "bg-blue-100 font-semibold" : ""
-                        }`}
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          setFromLocation(opt);
-                          setFromQuery(opt);
-                          setFromOpen(false);
-                        }}
-                      >
-                        {opt}
-                      </li>
-                    ))}
-                  {fromOptions.filter((opt) =>
-                    opt.toLowerCase().includes(fromQuery.toLowerCase())
-                  ).length === 0 && (
-                    <li className="px-4 py-2 text-gray-500">No matches found</li>
-                  )}
-                </ul>
-              )}
-            </div>
+            <AirportDropdown
+              label="From"
+              options={fromOptions}
+              value={fromLocation}
+              onChange={(val) => setFromLocation(val)}
+            />
+
+            <AirportDropdown
+              label="To"
+              options={toOptions}
+              value={toLocation}
+              onChange={(val) => setToLocation(val)}
+            />
   
             {/* Swap Button */}
             <div className="flex items-center justify-center p-2 border-r border-gray-300">
@@ -195,55 +166,10 @@ export default function FlightSearchForm() {
                 <ArrowLeftRight className="h-4 w-4" />
               </Button>
             </div>
-  
-            {/* To Field */}
-            <div ref={toRef} className="relative p-4 pl-2 border-r border-gray-300">
-              <Label className="text-sm text-gray-600 mb-1">To</Label>
-              <input
-                value={toQuery}
-                onChange={(e) => {
-                  setToQuery(e.target.value);
-                  setToLocation(e.target.value);
-                  setToOpen(true);
-                }}
-                onFocus={() => setToOpen(true)}
-                className="w-full border-0 p-0 text-gray-900 font-medium focus-visible:ring-0 bg-transparent outline-none"
-                placeholder="destination"
-              />
-              {toOpen && (
-                <ul className="absolute left-0 right-0 mt-2 max-h-64 overflow-auto bg-white text-gray-900 rounded-lg shadow-xl z-20 border border-gray-300">
-                  {toOptions
-                    .filter((opt) =>
-                      opt.toLowerCase().includes(toQuery.toLowerCase())
-                    )
-                    .map((opt) => (
-                      <li
-                        key={opt}
-                        className={`px-4 py-2 cursor-pointer hover:bg-blue-50 ${
-                          toLocation === opt ? "bg-blue-100 font-semibold" : ""
-                        }`}
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          setToLocation(opt);
-                          setToQuery(opt);
-                          setToOpen(false);
-                        }}
-                      >
-                        {opt}
-                      </li>
-                    ))}
-                  {toOptions.filter((opt) =>
-                    opt.toLowerCase().includes(toQuery.toLowerCase())
-                  ).length === 0 && (
-                    <li className="px-4 py-2 text-gray-500">No matches found</li>
-                  )}
-                </ul>
-              )}
-            </div>
-  
+
             {/* Depart Date */}
             <div
-              className="relative p-4 border-r border-gray-300 cursor-pointer"
+              className="relative border-r border-gray-300 p-2 cursor-pointer"
               onClick={() => setShowDatePicker(true)}
             >
               <Label className="text-sm text-gray-600 mb-1">Depart</Label>
@@ -254,7 +180,7 @@ export default function FlightSearchForm() {
   
             {/* Travellers and Cabin Class */}
             <div
-              className="relative p-4 cursor-pointer"
+              className="relative border-r border-gray-300 p-2 cursor-pointer"
               onClick={() => setShowPassengerModal(true)}
             >
               <Label className="text-sm text-left text-gray-600 mb-1">
@@ -266,13 +192,12 @@ export default function FlightSearchForm() {
                 </span>
               </div>
             </div>
-          </div>
-  
-          {/* Options and Search */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mt-4 gap-4">
-            <Button onClick={goToResults} className="bg-white hover:bg-blue-100 text-gray-900 px-8 py-6 text-lg font-medium rounded-lg shadow">
+            {/* Options and Search */}
+            <div className="flex items-center md:items-center gap-4 ">
+            <Button onClick={goToResults} className="bg-blue-100 hover:bg-blue-100 text-gray-900 px-8 py-6 text-lg font-medium rounded-lg shadow cursor-pointer">
               Search
             </Button>
+          </div>
           </div>
         </div>
       </div>
