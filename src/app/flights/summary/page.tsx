@@ -1,5 +1,4 @@
 'use client';
-
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/(components)/ui/card";
@@ -19,34 +18,41 @@ function FlightSummaryContent() {
   const arrivalTime = searchParams?.get("arrivalTime") || "";
   const departureCode = searchParams?.get("departureCode") || "";
   const arrivalCode = searchParams?.get("arrivalCode") || "";
-  const price = searchParams?.get("price") || "0";
-  const noOfSeats = searchParams?.get("travellers") || "1";
+  const price = parseFloat(searchParams?.get("price") || "0"); 
+  const noOfSeats = parseInt(searchParams?.get("travellers") || "1", 10); 
 
   // Handle flight booking
   const handleBookFlight = async () => {
     if (loading) return;
+
     const jwt = localStorage.getItem("jwt_token");
     if (!jwt) {
       router.push("/auth/login");
       return;
     }
+
     setLoading(true);
     setError(null);
+
     try {
       const userId = localStorage.getItem("user_id");
       const recipientEmail = localStorage.getItem("recipientEmail");
+
       if (!userId) {
         throw new Error("User ID not found");
       }
+
       const bookingData = {
         userId: userId,
         flightId,
         noOfSeats,
         recipientEmail
       };
+
       console.log("Sending booking data:", bookingData);
       const response = await api.post("/bookingService/api/v1/bookings", bookingData);
       console.log("Booking response:", response.data);
+
       if (response.data?.success && response.data?.data) {
         const bookingDetails = response.data.data;
         const paymentUrl = `/flights/payment?bookingId=${bookingDetails.id}&amount=${bookingDetails.totalCost}&status=${bookingDetails.status}`;
@@ -131,7 +137,7 @@ function FlightSummaryContent() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>
-                    Base Fare ({noOfSeats} {noOfSeats > '1' ? "passengers" : "passenger"})
+                    Base Fare ({noOfSeats} {noOfSeats > 1 ? "passengers" : "passenger"})
                   </span>
                   <span>₹{(price * noOfSeats).toLocaleString()}</span>
                 </div>
