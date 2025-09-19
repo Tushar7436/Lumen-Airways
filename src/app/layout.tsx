@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import Footer from "@/(components)/Footer";
@@ -33,6 +34,7 @@ export default function RootLayout({
             <main>{children}</main>
           <Footer/>
         </AuthProvider>
+      <SpeedInsights/>
       </body>
     </html>
   );
