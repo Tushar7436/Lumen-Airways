@@ -30,7 +30,9 @@ export default function LoginPage() {
       const { jwt, UserId, recepientEmail, userName } = data.data;
       login(jwt, UserId.toString(), userName, recepientEmail);
       const returnUrl = new URLSearchParams(window.location.search).get("returnUrl");
-      router.push(returnUrl || "/");
+      if (returnUrl) {
+        router.push(returnUrl);
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Login failed");
     } finally {

@@ -1,5 +1,3 @@
-// app/recommendations/page.tsx (using App Router with SSG/ISR)
-
 import api from "@/lib/axios";
 
 type Flight = {
@@ -48,7 +46,7 @@ async function getDeals(): Promise<Deal[]> {
 // ✅ Static Generation (rebuild every 30 mins with ISR)
 export const revalidate = 1800; // 30 minutes
 
-export default async function RecommendationsPage() {
+async function RecommendationsContent() {
   const deals = await getDeals();
 
   return (
@@ -141,4 +139,8 @@ export default async function RecommendationsPage() {
       </div>
     </div>
   );
+}
+
+export default function Recommendations() {
+  return <RecommendationsContent />;
 }

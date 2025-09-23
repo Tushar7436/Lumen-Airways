@@ -27,7 +27,8 @@ function FlightSummaryContent() {
 
     const jwt = localStorage.getItem("jwt_token");
     if (!jwt) {
-      router.push("/auth/login");
+      const currentUrl = window.location.href;
+      router.push(`/auth/login?returnUrl=${encodeURIComponent(currentUrl)}`);
       return;
     }
 
