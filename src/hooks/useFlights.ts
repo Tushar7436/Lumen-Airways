@@ -72,22 +72,22 @@ export function useFlights() {
           id: f.id.toString(),
           flightNumber: f.flightNumber,
           airline: {
-            code: f.flightNumber?.split(" ")[0] || "XX",
-            name: f.airplane_detail?.modelNumber || "Unknown Airline"
+            code: f.flightNumber?.split(" ")[0] || f.airplane_detail?.modelNumber || "",
+            name: f.airplane_detail?.modelNumber || ""
           },
           departure: {
             time: formatTime(f.departureTime),
             airport: {
-              code: f.departure_airport?.code || f.departureAirportId,
-              name: f.departure_airport?.name || "Unknown",
+              code: f.departure_airport?.code || "",
+              name: f.departure_airport?.name || "",
               city: f.departure_airport?.cityName || ""
             }
           },
           arrival: {
             time: formatTime(f.arrivalTime),
             airport: {
-              code: f.arrival_airport?.code || f.arrivalAirportId,
-              name: f.arrival_airport?.name || "Unknown",
+              code: f.arrival_airport?.code || "",
+              name: f.arrival_airport?.name || "",
               city: f.arrival_airport?.cityName || ""
             }
           },
@@ -99,14 +99,14 @@ export function useFlights() {
             currency: "INR"
           },
           deals: [],
-          from: f.departure_airport?.code || f.departureAirportId,
-          to: f.arrival_airport?.code || f.arrivalAirportId,
+          from: f.departure_airport?.code || "",
+          to: f.arrival_airport?.code || "",
           departureAirportId: f.departureAirportId,
           arrivalAirportId: f.arrivalAirportId,
           departureTime: f.departureTime,
           arrivalTime: f.arrivalTime,
           fare: f.price,
-          carrier: f.flightNumber?.split(" ")[0] || "XX"
+          carrier: f.flightNumber?.split(" ")[0] || f.airplane_detail?.modelNumber || ""
         }));
 
         setFlights(transformedFlights);
