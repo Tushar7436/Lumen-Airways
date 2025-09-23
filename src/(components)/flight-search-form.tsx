@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation"; // ✅ added
 import { Button } from "@/(components)/ui/button";
 import { Label } from "@/(components)/ui/label";
 import { ArrowLeftRight } from "lucide-react";
@@ -13,18 +13,32 @@ import api from "@/lib/axios";
 export default function FlightSearchForm() {
   const formatDate = (d: Date) => d.toLocaleDateString("en-GB");
   const router = useRouter();
-  const [fromLocation, setFromLocation] = useState("");
-  const [toLocation, setToLocation] = useState("");
-  const [departDate, setDepartDate] = useState(formatDate(new Date()));
-  const [passengers, setPassengers] = useState({ adults: 1, children: 0 });
+  const params = useSearchParams(); // ✅ read query params
+
+  // ✅ initialize from query params
+  const tripsParam = params.get("trips");
+  const initialFrom = tripsParam ? tripsParam.split("-")[0] : "";
+  const initialTo = tripsParam ? tripsParam.split("-")[1] : "";
+  const initialTravellers = params.get("travellers");
+  const initialDate = params.get("tripDate")
+    ? new Date(params.get("tripDate")!).toLocaleDateString("en-GB")
+    : formatDate(new Date());
+
+  const [fromLocation, setFromLocation] = useState(initialFrom);
+  const [toLocation, setToLocation] = useState(initialTo);
+  const [departDate, setDepartDate] = useState(initialDate);
+  const [passengers, setPassengers] = useState({
+    adults: initialTravellers ? parseInt(initialTravellers) : 1,
+    children: 0,
+  });
   const [cabinClass, setCabinClass] = useState("Economy");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showPassengerModal, setShowPassengerModal] = useState(false);
 
   const [fromOptions, setFromOptions] = useState<string[]>([]);
   const [toOptions, setToOptions] = useState<string[]>([]);
-  const [fromQuery, setFromQuery] = useState("");
-  const [toQuery, setToQuery] = useState("");
+  const [fromQuery, setFromQuery] = useState(initialFrom);
+  const [toQuery, setToQuery] = useState(initialTo);
   const [fromOpen, setFromOpen] = useState(false);
   const [toOpen, setToOpen] = useState(false);
 
@@ -43,26 +57,24 @@ export default function FlightSearchForm() {
 
           // Collect unique departure & arrival airport codes
           const departures = Array.from(
-            new Set(
-              flights.map((f: any) => String(f.departureAirportId ?? ""))
-            )
+            new Set(flights.map((f: any) => String(f.departureAirportId ?? "")))
           ) as string[];
           const arrivals = Array.from(
-            new Set(
-              flights.map((f: any) => String(f.arrivalAirportId ?? ""))
-            )
+            new Set(flights.map((f: any) => String(f.arrivalAirportId ?? "")))
           ) as string[];
 
           setFromOptions(departures);
           setToOptions(arrivals);
 
-          // Set defaults
-          const defaultFrom = departures[0] || "";
-          const defaultTo = arrivals[0] || "";
-          setFromLocation(defaultFrom);
-          setToLocation(defaultTo);
-          setFromQuery(defaultFrom);
-          setToQuery(defaultTo);
+          // ✅ only set defaults if query params didn’t provide anything
+          if (!initialFrom && departures.length > 0) {
+            setFromLocation(departures[0]);
+            setFromQuery(departures[0]);
+          }
+          if (!initialTo && arrivals.length > 0) {
+            setToLocation(arrivals[0]);
+            setToQuery(arrivals[0]);
+          }
         }
       } catch (err) {
         console.error("Error fetching flights:", err);
@@ -70,7 +82,7 @@ export default function FlightSearchForm() {
     };
 
     fetchFlights();
-  }, []);
+  }, []); // run once
 
   const handleSwapLocations = () => {
     const currentFrom = fromLocation;
@@ -194,10 +206,13 @@ export default function FlightSearchForm() {
             </div>
             {/* Options and Search */}
             <div className="flex items-center md:items-center gap-4 ">
-            <Button onClick={goToResults} className="bg-blue-100 hover:bg-blue-100 text-gray-900 px-8 py-6 text-lg font-medium rounded-lg shadow cursor-pointer">
-              Search
-            </Button>
-          </div>
+              <Button
+                onClick={goToResults}
+                className="bg-blue-100 hover:bg-blue-100 text-gray-900 px-8 py-6 text-lg font-medium rounded-lg shadow cursor-pointer"
+              >
+                Search
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -221,5 +236,4 @@ export default function FlightSearchForm() {
       />
     </>
   );
-  
 }
