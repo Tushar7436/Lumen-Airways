@@ -72,11 +72,11 @@ export function ResultsList({ flights, isLoading }: ResultsListProps) {
             <span className="ml-2 text-sm">₹{Math.min(...flights.map((f) => f.price.amount)).toLocaleString()}</span>
           </Button>
           <Button variant={sortBy === "cheapest" ? "default" : "outline"} onClick={() => setSortBy("cheapest")}>
-            Cheapest
+            Economy
             <span className="ml-2 text-sm">₹{Math.min(...flights.map((f) => f.price.amount)).toLocaleString()}</span>
           </Button>
           <Button variant={sortBy === "fastest" ? "default" : "outline"} onClick={() => setSortBy("fastest")}>
-            Fastest
+            Premium
             <span className="ml-2 text-sm">₹{Math.min(...flights.map((f) => f.price.amount)).toLocaleString()}</span>
           </Button>
         </div>

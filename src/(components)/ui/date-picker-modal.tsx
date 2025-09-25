@@ -11,6 +11,7 @@ interface DatePickerModalProps {
   onDateSelect: (date: string) => void
   selectedDate: string
   tripType: string
+  availableDates?: string[] // ISO dates: YYYY-MM-DD
 }
 
 export default function DatePickerModal({
@@ -19,6 +20,7 @@ export default function DatePickerModal({
   onDateSelect,
   selectedDate,
   tripType,
+  availableDates = [],
 }: DatePickerModalProps) {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth())
@@ -93,6 +95,7 @@ export default function DatePickerModal({
   }
 
   const renderCalendar = (monthOffset = 0) => {
+    const availableSet = new Set(availableDates)
     const month = (currentMonth + monthOffset) % 12
     const year = currentYear + Math.floor((currentMonth + monthOffset) / 12)
     const days = generateCalendar(month, year)
@@ -135,7 +138,13 @@ export default function DatePickerModal({
               className={`
                 text-center text-sm rounded-full hover:bg-gray-300 transition-colors
                 ${!day ? "invisible" : ""}
-                ${day === 10 && month === 8 ? "bg-blue-900 text-white" : ""}
+                ${(() => {
+                  if (!day) return "";
+                  const mm = String(month + 1).padStart(2, "0")
+                  const dd = String(day).padStart(2, "0")
+                  const iso = `${year}-${mm}-${dd}`
+                  return availableSet.has(iso) ? "bg-emerald-100 text-emerald-900 ring-1 ring-emerald-300" : ""
+                })()}
                 ${day ? "hover:bg-gray-100" : ""}
               `}
               disabled={!day}

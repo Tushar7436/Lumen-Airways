@@ -4,21 +4,27 @@
 import { useState, useRef, useEffect } from "react";
 import { Label } from "./label";
 
+interface AirportOption { code: string; city: string }
+
 interface AirportDropdownProps {
   label: string;
-  options: string[];
-  value: string;
-  onChange: (val: string) => void;
+  options: AirportOption[];
+  value: string; // airport code
+  onChange: (val: string) => void; // passes airport code
 }
 
 export default function AirportDropdown({ label, options, value, onChange }: AirportDropdownProps) {
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState(value);
+  const [query, setQuery] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const filteredOptions = options.filter(opt =>
-    opt.toLowerCase().includes(query.toLowerCase())
-  );
+  const selected = options.find(o => o.code === value) || null;
+  const displayText = selected ? `${selected.city} (${selected.code})` : "";
+
+  const filteredOptions = options.filter(opt => {
+    const label = `${opt.city} (${opt.code})`;
+    return label.toLowerCase().includes(query.toLowerCase());
+  });
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -31,8 +37,8 @@ export default function AirportDropdown({ label, options, value, onChange }: Air
   }, []);
 
   useEffect(() => {
-    setQuery(value);
-  }, [value]);
+    setQuery(displayText);
+  }, [displayText]);
 
   return (
     <div ref={containerRef} className="relative p-4 border-r border-gray-300">
@@ -41,7 +47,6 @@ export default function AirportDropdown({ label, options, value, onChange }: Air
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
-          onChange(e.target.value);
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
@@ -53,16 +58,16 @@ export default function AirportDropdown({ label, options, value, onChange }: Air
           {filteredOptions.length ? (
             filteredOptions.map((opt) => (
               <li
-                key={opt}
-                className={`px-4 py-2 cursor-pointer hover:bg-blue-50 ${value === opt ? "bg-blue-100 font-semibold" : ""}`}
+                key={opt.code}
+                className={`px-4 py-2 cursor-pointer hover:bg-blue-50 ${value === opt.code ? "bg-blue-100 font-semibold" : ""}`}
                 onMouseDown={(e) => {
                   e.preventDefault();
-                  onChange(opt);
-                  setQuery(opt);
+                  onChange(opt.code);
+                  setQuery(`${opt.city} (${opt.code})`);
                   setOpen(false);
                 }}
               >
-                {opt}
+                {opt.city} ({opt.code})
               </li>
             ))
           ) : (

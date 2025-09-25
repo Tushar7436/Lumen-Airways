@@ -50,7 +50,7 @@ export default function PassengerModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Cabin class</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">Travellers</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
