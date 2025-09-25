@@ -5,6 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/(components)/ui/card";
 import { Button } from "@/(components)/ui/button";
 import api from "@/lib/axios";
+import dynamic from "next/dynamic";
+
+const PaymentReceipt = dynamic(() => import("@/(components)/PaymentReceipt"), { ssr: false });
 
 function PaymentPageComponent() {
   const router = useRouter();
@@ -16,6 +19,7 @@ function PaymentPageComponent() {
   const [paymentResponse, setPaymentResponse] = useState<any>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [bookingInfo, setBookingInfo] = useState<any | null>(null);
 
   // --- init ---
   const userId = typeof window !== "undefined" ? localStorage.getItem("user_id") : null;
@@ -125,6 +129,11 @@ function PaymentPageComponent() {
             );
             setPaymentResponse(verifyRes.data);
             setPaymentConfirmed(true);
+            try {
+              // Fetch booking details for receipt enrichment
+              const details = await api.get(`/bookingService/api/v1/bookings/${bookingId}`);
+              setBookingInfo(details.data?.data || null);
+            } catch {}
           } catch (verifyErr: any) {
             setError(
               verifyErr.response?.data?.message ||
@@ -199,12 +208,10 @@ function PaymentPageComponent() {
             </div>
           </div>
 
-          {paymentResponse && (
+          {paymentConfirmed && (
             <div className="mt-4 p-4 border rounded bg-green-50 text-green-700">
-              <div className="font-bold mb-2">Payment Response:</div>
-              <pre className="text-xs whitespace-pre-wrap">
-                {JSON.stringify(paymentResponse, null, 2)}
-              </pre>
+              <div className="font-bold mb-2">Payment Successful</div>
+              <div className="text-sm">Your payment has been confirmed. You can download your receipt below.</div>
             </div>
           )}
 
@@ -227,6 +234,14 @@ function PaymentPageComponent() {
               ? "Payment Confirmed"
               : "Confirm Payment"}
           </Button>
+          {paymentConfirmed && paymentDetails && (
+            <PaymentReceipt
+              bookingId={paymentDetails.bookingId}
+              amount={paymentDetails.amount}
+              status={paymentDetails.status}
+              bookingDetails={bookingInfo}
+            />
+          )}
           <Button
             variant="outline"
             className="w-full"

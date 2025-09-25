@@ -1,6 +1,6 @@
 import HeroSection from "@/(components)/HeroSection";
 import { Suspense } from "react";
-import Extra from "@/(components)/Extra";
+import Banner from "@/(components)/Banner";
 import FAQ from "@/(components)/FAQ";
 import Recommendations from "@/(components)/Recommendations";
 import ErrorBoundary from "@/(components)/ErrorBoundary";
@@ -27,7 +27,7 @@ export default function HomePage() {
         <HeroSection />
         <Recommendations />
         <FAQ />
-        <Extra />
+        <Banner />
       </ErrorBoundary>
     </Suspense>
     </>
