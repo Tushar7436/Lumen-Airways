@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function Navbar() {
   const { isLoggedIn, userId, logout } = useAuth();
@@ -23,11 +24,18 @@ export default function Navbar() {
   return (
     <nav className="w-full bg-[#05203c] shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
-          {/* Logo */}
-          <div className="text-xl font-bold text-white font-sans">
-            <Link href="/">Lumen Airlines</Link>
-          </div>
+        <div className="flex justify-between items-center py-6">
+          {/* Logo only */}
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/image.png"
+              alt="Airline Logo"
+              width={120}
+              height={40}
+              priority
+              className="h-auto w-[120px]"
+            />
+          </Link>
 
           {/* Links & buttons */}
           <div className="flex items-center space-x-6">

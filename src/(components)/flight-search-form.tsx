@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation"; // ✅ added
+import { useRouter, useSearchParams } from "next/navigation"; 
 import { Button } from "@/(components)/ui/button";
 import { Label } from "@/(components)/ui/label";
 import { ArrowLeftRight } from "lucide-react";
@@ -13,9 +13,9 @@ import api from "@/lib/axios";
 export default function FlightSearchForm() {
   const formatDate = (d: Date) => d.toLocaleDateString("en-GB");
   const router = useRouter();
-  const params = useSearchParams(); // ✅ read query params
+  const params = useSearchParams(); 
 
-  // ✅ initialize from query params
+  // initialize from query params
   const tripsParam = params.get("trips");
   const initialFrom = tripsParam ? tripsParam.split("-")[0] : "";
   const initialTo = tripsParam ? tripsParam.split("-")[1] : "";
@@ -31,12 +31,15 @@ export default function FlightSearchForm() {
     adults: initialTravellers ? parseInt(initialTravellers) : 1,
     children: 0,
   });
-  const [cabinClass, setCabinClass] = useState("Economy");
+  const [cabinClass, setCabinClass] = useState("Eclass");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showPassengerModal, setShowPassengerModal] = useState(false);
 
-  const [fromOptions, setFromOptions] = useState<string[]>([]);
-  const [toOptions, setToOptions] = useState<string[]>([]);
+  type AirportOption = { code: string; city: string };
+  const [fromOptions, setFromOptions] = useState<AirportOption[]>([]);
+  const [toOptions, setToOptions] = useState<AirportOption[]>([]);
+  const [availableDates, setAvailableDates] = useState<string[]>([]); // ISO YYYY-MM-DD
+  const [allFlights, setAllFlights] = useState<any[]>([]);
   const [fromQuery, setFromQuery] = useState(initialFrom);
   const [toQuery, setToQuery] = useState(initialTo);
   const [fromOpen, setFromOpen] = useState(false);
@@ -45,7 +48,7 @@ export default function FlightSearchForm() {
   const fromRef = useRef<HTMLDivElement | null>(null);
   const toRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ Fetch flights & extract from/to options
+  // Fetch flights & extract from/to options
   useEffect(() => {
     const fetchFlights = async () => {
       try {
@@ -54,26 +57,52 @@ export default function FlightSearchForm() {
 
         if (json.success && Array.isArray(json.data)) {
           const flights = json.data;
-
-          // Collect unique departure & arrival airport codes
-          const departures = Array.from(
-            new Set(flights.map((f: any) => String(f.departureAirportId ?? "")))
-          ) as string[];
-          const arrivals = Array.from(
-            new Set(flights.map((f: any) => String(f.arrivalAirportId ?? "")))
-          ) as string[];
-
-          setFromOptions(departures);
-          setToOptions(arrivals);
-
-          // ✅ only set defaults if query params didn’t provide anything
-          if (!initialFrom && departures.length > 0) {
-            setFromLocation(departures[0]);
-            setFromQuery(departures[0]);
+          setAllFlights(flights);
+          // Initial available dates based on all flights until user selects filters
+          const dateSet = new Set<string>();
+          for (const f of flights) {
+            if (f?.departureTime) {
+              const d = new Date(f.departureTime);
+              const iso = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+              dateSet.add(iso);
+            }
           }
-          if (!initialTo && arrivals.length > 0) {
-            setToLocation(arrivals[0]);
-            setToQuery(arrivals[0]);
+          setAvailableDates(Array.from(dateSet));
+
+
+          // Build unique airport options with code and name
+          const depOptions: AirportOption[] = [];
+          const arrOptions: AirportOption[] = [];
+          const seenDep = new Set<string>();
+          const seenArr = new Set<string>();
+
+          for (const f of flights) {
+            const depCode = f?.departure_airport?.code || String(f.departureAirportCode || f.departureAirportId || "");
+            const depCity = f?.departure_airport?.City?.name || String(f.departureAirportCity || f.departureAirportName || "");
+            const arrCode = f?.arrival_airport?.code || String(f.arrivalAirportCode || f.arrivalAirportId || "");
+            const arrCity = f?.arrival_airport?.City?.name || String(f.arrivalAirportCity || f.arrivalAirportName || "");
+
+            if (depCode && !seenDep.has(depCode)) {
+              depOptions.push({ code: depCode, city: depCity || depCode });
+              seenDep.add(depCode);
+            }
+            if (arrCode && !seenArr.has(arrCode)) {
+              arrOptions.push({ code: arrCode, city: arrCity || arrCode });
+              seenArr.add(arrCode);
+            }
+          }
+
+          setFromOptions(depOptions);
+          setToOptions(arrOptions);
+
+          // only set defaults if query params didn’t provide anything
+          if (!initialFrom && depOptions.length > 0) {
+            setFromLocation(depOptions[0].code);
+            setFromQuery(`${depOptions[0].city} (${depOptions[0].code})`);
+          }
+          if (!initialTo && arrOptions.length > 0) {
+            setToLocation(arrOptions[0].code);
+            setToQuery(`${arrOptions[0].city} (${arrOptions[0].code})`);
           }
         }
       } catch (err) {
@@ -94,6 +123,28 @@ export default function FlightSearchForm() {
     setFromQuery(currentToQuery);
     setToQuery(currentFromQuery);
   };
+
+  // Recompute available dates whenever From/To change
+  useEffect(() => {
+    if (!allFlights || allFlights.length === 0) return;
+    const filtered = allFlights.filter((f: any) => {
+      const depCode = f?.departure_airport?.code || String(f.departureAirportCode || f.departureAirportId || "");
+      const arrCode = f?.arrival_airport?.code || String(f.arrivalAirportCode || f.arrivalAirportId || "");
+      const matchesFrom = fromLocation ? depCode === fromLocation : true;
+      const matchesTo = toLocation ? arrCode === toLocation : true;
+      return matchesFrom && matchesTo;
+    });
+
+    const dateSet = new Set<string>();
+    for (const f of filtered) {
+      if (f?.departureTime) {
+        const d = new Date(f.departureTime);
+        const iso = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+        dateSet.add(iso);
+      }
+    }
+    setAvailableDates(Array.from(dateSet));
+  }, [fromLocation, toLocation, allFlights]);
 
   const handleDateSelect = (date: string) => {
     setDepartDate(date);
@@ -224,6 +275,7 @@ export default function FlightSearchForm() {
         onDateSelect={handleDateSelect}
         selectedDate={departDate}
         tripType="one-way"
+        availableDates={availableDates}
       />
   
       <PassengerModal

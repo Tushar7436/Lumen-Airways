@@ -1,4 +1,4 @@
-export default function Extra(){
+export default function Banner(){
   return(
       <div className="py-16 flex justify-center">
       <div className="max-w-6xl bg-[rgba(239,243,248,1)] font-extralight tracking-normal text-black justify-center mx-1.5 my-1.5 rounded-lg">
@@ -17,9 +17,9 @@ export default function Extra(){
           {/* Search Everywhere Feature */}
           <div className="text-center">
             <div className="mb-6 flex justify-center items-end">
-              <div className="w-36 h-24 flex items-center justify-center">
-                <svg className=" text-white">
-                  <image href="/image1.svg" />
+              <div className="w-44 h-32 flex items-center justify-center">
+                <svg className=" text-white" width="176" height="128" viewBox="0 0 176 128" preserveAspectRatio="xMidYMid meet">
+                  <image href="/image1.svg" width="176" height="128" />
                 </svg>
               </div>
             </div>
@@ -33,9 +33,9 @@ export default function Extra(){
           {/* Transparent Pricing Feature */}
           <div className="text-center">
             <div className="mb-6 flex justify-center">
-              <div className="w-36 h-24 flex items-center justify-center">
-                <svg className=" text-white">
-                  <image href="/image2.svg" />
+              <div className="w-44 h-32 flex items-center justify-center">
+                <svg className=" text-white" width="176" height="128" viewBox="0 0 176 128" preserveAspectRatio="xMidYMid meet">
+                  <image href="/image2.svg" width="176" height="128" />
                 </svg>
               </div>
             </div>
@@ -51,9 +51,9 @@ export default function Extra(){
           {/* Price Alerts Feature */}
           <div className="text-center">
             <div className="mb-6 flex justify-center">
-              <div className="w-36 h-24 flex items-center justify-center">
-                <svg className=" text-white">
-                  <image href="/image3.svg" />
+              <div className="w-44 h-32 flex items-center justify-center">
+                <svg className=" text-white" width="176" height="128" viewBox="0 0 176 128" preserveAspectRatio="xMidYMid meet">
+                  <image href="/image3.svg" width="176" height="128" />
                 </svg>
               </div>
             </div>
