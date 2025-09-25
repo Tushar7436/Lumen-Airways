@@ -73,14 +73,9 @@ function PaymentPageComponent() {
       const jwt = localStorage.getItem("jwt_token");
       const recipientEmail = localStorage.getItem("recipientEmail");
 
-      // Load Razorpay SDK
+      // Razorpay SDK
       const loadRazorpayScript = () => {
         return new Promise<boolean>((resolve) => {
-          const existingScript = document.querySelector(
-            'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
-          );
-          if (existingScript) return resolve(true);
-
           const script = document.createElement("script");
           script.src = "https://checkout.razorpay.com/v1/checkout.js";
           script.onload = () => resolve(true);
@@ -93,7 +88,6 @@ function PaymentPageComponent() {
       if (!scriptLoaded) throw new Error("Razorpay SDK failed to load");
 
 
-      // Step 1: create Razorpay order from backend
       const paymentData = {
         totalCost: paymentDetails.amount,
         userId: Number(userId),
@@ -109,7 +103,7 @@ function PaymentPageComponent() {
 
       const { orderId, amount, currency, key, bookingId } = res.data.data;
 
-      // Step 2: open Razorpay checkout
+
       const options = {
         key,
         amount,
@@ -119,8 +113,6 @@ function PaymentPageComponent() {
         order_id: orderId,
         handler: async function (response: any) {
           try {
-            console.log("verifyRessssssssssssssssssss");
-            // Step 3: verify payment with backen
             const verifyRes = await api.post(
               "/bookingService/api/v1/bookings/verifyPayment",
               {
@@ -131,9 +123,7 @@ function PaymentPageComponent() {
                 recipientEmail,
               },
             );
-            console.log("verifyRessssssssssssssssssss",verifyRes.data);
             setPaymentResponse(verifyRes.data);
-            console.log("verifyRessssssssssssssssssss",verifyRes.data);
             setPaymentConfirmed(true);
           } catch (verifyErr: any) {
             setError(
@@ -243,7 +233,7 @@ function PaymentPageComponent() {
             onClick={() => router.push("/")}
             disabled={loading}
           >
-            Cancel
+            Back To Home
           </Button>
         </CardFooter>
       </Card>
