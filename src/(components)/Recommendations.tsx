@@ -1,4 +1,5 @@
 import api from "@/lib/axios";
+import Link from "next/link";
 
 type Flight = {
   date: string;
@@ -12,6 +13,16 @@ type Deal = {
   img: string;
   flights: Flight[];
   price: string;
+  // details used for booking flow
+  flightId: string;
+  flightNumber: string;
+  departureTime: string; // ISO string
+  arrivalTime: string; // ISO string
+  departureCode: string;
+  arrivalCode: string;
+  priceValue: number;
+  departureCity?: string;
+  arrivalCity?: string;
 };
 
 async function getDeals(): Promise<Deal[]> {
@@ -22,19 +33,36 @@ async function getDeals(): Promise<Deal[]> {
     if (json.success && Array.isArray(json.data)) {
       const flights = json.data;
 
-      return flights.map((flight: any) => ({
-        city: flight.arrival_airport?.name || "Unknown City",
-        country: "India", // fallback or extend from backend if available
-        img: `https://picsum.photos/seed/${flight.arrival_airport?.code}/400/200`,
-        flights: [
-          {
-            date: new Date(flight.departureTime).toDateString(),
-            route: `${flight.departure_airport?.code} → ${flight.arrival_airport?.code}`,
-            airline: flight.flightNumber,
-          },
-        ],
-        price: `₹ ${flight.price}`,
-      }));
+      return flights.map((flight: any) => {
+        const departureCode = flight.departure_airport?.code || "";
+        const arrivalCode = flight.arrival_airport?.code || "";
+        const departureTime = flight.departureTime ? new Date(flight.departureTime).toISOString() : "";
+        const arrivalTime = flight.arrivalTime ? new Date(flight.arrivalTime).toISOString() : "";
+        const priceValue = Number(flight.price) || 0;
+
+        return {
+          city: flight.arrival_airport?.City?.name || flight.arrival_airport?.name || "Unknown City",
+          country: "India",
+          img: `https://picsum.photos/seed/${arrivalCode}/400/200`,
+          flights: [
+            {
+              date: new Date(flight.departureTime).toDateString(),
+              route: `${departureCode} → ${arrivalCode}`,
+              airline: flight.flightNumber,
+            },
+          ],
+          price: `₹ ${priceValue}`,
+          flightId: String(flight.id ?? ""),
+          flightNumber: String(flight.flightNumber ?? ""),
+          departureTime,
+          arrivalTime,
+          departureCode,
+          arrivalCode,
+          priceValue,
+          departureCity: flight.departure_airport?.City?.name || flight.departure_airport?.name || departureCode,
+          arrivalCity: flight.arrival_airport?.City?.name || flight.arrival_airport?.name || arrivalCode,
+        } as Deal;
+      });
     }
     return [];
   } catch (error) {
@@ -43,8 +71,7 @@ async function getDeals(): Promise<Deal[]> {
   }
 }
 
-// ✅ Static Generation (rebuild every 30 mins with ISR)
-export const revalidate = 1800; // 30 minutes
+export const revalidate = 900; 
 
 async function RecommendationsContent() {
   const deals = await getDeals();
@@ -103,9 +130,9 @@ async function RecommendationsContent() {
                   {/* Destination */}
                   <div className="mb-4">
                     <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">
-                      {deal.city}
+                      {deal.arrivalCity} ({deal.arrivalCode})
                     </h3>
-                    <p className="text-sm text-gray-600">{deal.country}</p>
+                    <p className="text-sm text-gray-600">From {deal.departureCity} ({deal.departureCode})</p>
                   </div>
 
                   {/* Flight Details */}
@@ -128,9 +155,24 @@ async function RecommendationsContent() {
                   </div>
 
                   {/* Book Button */}
-                  <button className="w-full bg-gray-900 text-white py-3 px-4 rounded-md font-medium hover:bg-gray-800 transition-colors duration-200">
+                  <Link
+                    href={{
+                      pathname: "/flights/summary",
+                      query: {
+                        flightId: deal.flightId,
+                        flightNumber: deal.flightNumber,
+                        departureTime: deal.departureTime,
+                        arrivalTime: deal.arrivalTime,
+                        departureCode: deal.departureCode,
+                        arrivalCode: deal.arrivalCode,
+                        price: String(deal.priceValue),
+                        travellers: "1",
+                      },
+                    }}
+                    className="block w-full bg-gray-900 text-white py-3 px-4 rounded-md font-medium text-center hover:bg-gray-800 transition-colors duration-200"
+                  >
                     Book Now
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}
