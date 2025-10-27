@@ -55,7 +55,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
     ```bash
     git clone https://github.com/Tushar7436/Lumen-Airways
-    cd YOUR-FRONTEND-REPO-NAME
+    cd Lumen-Airways
     ```
 
 2.  **Install dependencies:**
@@ -97,3 +97,4 @@ Contributions are what make the open-source community such an amazing place to l
 5.  Open a Pull Request
 
 -----
+
