@@ -1,4 +1,4 @@
-# ✈️ Flight Booking Platform (Frontend)
+# ✈️ Lumen Airways (Frontend)
 
 This repository contains the frontend client for a comprehensive, microservices-based flight booking platform. It provides a modern, responsive, and user-friendly interface for searching flights, managing bookings, and handling user authentication.
 
@@ -36,8 +36,6 @@ This decoupled approach ensures scalability, resilience, and maintainability. Th
   * **Framework:** [Next.js](https://nextjs.org/)
   * **Language:** [TypeScript](https://www.typescriptlang.org/)
   * **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-  * **State Management:** *(Add your state management library, e.g., Zustand, Redux, Context API)*
-  * **Data Fetching:** *(Add your data fetching library, e.g., SWR, React Query)*
 
 -----
 
@@ -99,7 +97,3 @@ Contributions are what make the open-source community such an amazing place to l
 5.  Open a Pull Request
 
 -----
-
-## 📄 License
-
-This project is licensed under the MIT License. See the `LICENSE` file for more details.
